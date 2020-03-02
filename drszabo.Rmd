@@ -1,0 +1,120 @@
+---
+title: "The role of adiponectin, TNF-α and glutathione in the pathogenesis and evolution of type 1 diabetes"
+author: "Csilla Enikő Szabo"
+output:
+  word_document:
+    fig_caption: yes
+    fig_height: 5
+    fig_width: 5
+    keep_md: no
+    toc: yes
+  html_document:  
+    df_print: kable
+    fig_caption: yes
+    fontface: Arial
+    fontsize: 11pt
+    number_sections: yes  
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+---
+
+# Tables
+
+```{r setup, echo=F, message=F, warning=F, results='hide'}
+library(tidyverse)
+#library(ggExtra) # ggMarginal()
+#library(cowplot) # plot_grid
+library(ggpubr)
+library(ggthemes)
+#library(ggcorrplot)
+#library(GGally) #ggpairs
+#library(dplyr)
+library(readxl)
+library(grid)
+
+library(pander)
+panderOptions('digits', 2)
+panderOptions('round', 2)
+panderOptions('keep.trailing.zeros', TRUE)
+options(scipen = 999)
+options(digits = 3)
+
+library(knitr)
+#library(formattable)
+library(kableExtra)
+
+#library(ggfortify)
+#library(survival)
+
+library(Hmisc)
+#library(stringr)
+library(DescTools)
+
+
+options(knitr.table.format = "pandoc")
+
+knitr::opts_chunk$set(comment = NA)
+
+library(captioner)
+fig_caption <- captioner::captioner("Figura")
+tab_caption <- captioner::captioner("Tabel")
+
+options(knitr.table.format = "pandoc")
+```
+
+```{r Source scripts, message=F, warning=F, echo=F, results='hide'}
+base_path = "~/Dropbox/Stats/"
+
+source(paste0(base_path, 'R library/search_for_variable.R'), echo=F)
+source(paste0(base_path, 'R library/mySSby.R'), echo=F)
+source(paste0(base_path, 'R library/mySSby3.R'), echo=F) # replace finalfit
+source(paste0(base_path, 'R library/describe_numerice1.R'), echo=F)
+source(paste0(base_path, 'R library/contingency.R'), echo=F)
+source(paste0(base_path, 'R library/describe2x2_v1.R'), echo=F)
+source(paste0(base_path, 'R library/mytheme.R'), echo=F)
+source(paste0(base_path, 'R library/assorted bits.R'), echo=F)
+source(paste0(base_path, 'R library/custom_charts.R'), echo=F)
+
+theme_set(my_theme(base_theme = theme_grey))
+
+setwd(paste0(base_path, "Dr Szabo Csilla"))
+```
+
+```{r Import data, echo=F, message=F, warning=F, fig.height=4, fig.width=6}
+
+metadata <- suppressWarnings(read_excel("Baza de date completa (28sept).xlsx", sheet = "metadata"))
+baza_de_date <- suppressWarnings(read_excel("Baza de date completa (28sept).xlsx", col_types = metadata$Type)) %>% 
+  labelled::set_variable_labels(.labels = metadata$Var) %>% 
+  mutate_at(metadata$ID[metadata$Type %in% c("text") & metadata$Role %in% c("danu" ,"binary", "factor", "ordered")], 
+            as.factor_metadata, metadata=metadata) %>%
+  labelled::set_variable_labels(.labels = metadata$Label)  %>%
+  select(-c(metadata$Var[metadata$Role == "exclude"])) %>%
+  select(-c(metadata$Var[metadata$Role=="id"]))
+
+my.groups <- list()
+
+for (gr in unique(na.omit(metadata$Group))) {
+  my.groups[[gr]] <- make_groups_metadata(gr, metadata)
+}
+
+# my.groups
+baza_de_date %<>% select(unlist(my.groups, use.names = F))
+
+
+
+```
+
+## Rezultate
+
+```{r echo=F, fig.height=4, fig.width=7, message=F, warning=F, dpi=144, results="asis", include=T}
+make_summary_table(baza_de_date, dep="Grup", g.rows = c("mean_sd"), phi=T,
+                   footnote = list(lang="en"), 
+                   header = list(lang="en", columns=c("Factor", "Levels", "Statistics")),
+                   metadata = metadata)
+```
+
+# Referințe
+
+1. R Core Team (2019). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.
+
